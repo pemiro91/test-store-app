@@ -1,16 +1,33 @@
-# store
+# Proyecto Flutter
 
-A new Flutter project.
+## Introducción
 
-## Getting Started
+Este proyecto es una aplicación Flutter lista para comenzar el desarrollo.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## Requisitos
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Antes de ejecutar el proyecto, asegúrate de configurar los archivos necesarios:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. **Archivo `.env`**
+    - Debe colocarse en la **raíz del proyecto Flutter**.
+    - Contiene las variables de entorno que el proyecto necesita, como API keys, URLs, etc.
+
+2. **Archivo `local.properties`**
+    - Debe colocarse en la **raíz del proyecto Android** (`android/local.properties`).
+    - Normalmente contiene la ruta del SDK de Android y otras configuraciones locales.
+
+> ⚠️ Estos archivos no deben subirse al repositorio por contener información sensible.
+
+---
+
+## Ejecución
+
+1. Instalar dependencias:
+```bash
+flutter pub get
+Ejecutar la app en un dispositivo o emulador:
+
+flutter run
+
