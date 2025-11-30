@@ -37,8 +37,11 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state.status == AuthStatus.idle) {
-          // Cuando se cierra sesión, redirige al login
+        if (state.isLoggingOut && state.status == AuthStatus.idle) {
+          if (Navigator.canPop(context)) {
+            Navigator.pop(context);
+          }
+          context.read<AuthCubit>().resetLogoutFlag();
           context.goNamed(login);
         }
       },

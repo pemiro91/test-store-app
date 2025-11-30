@@ -5,13 +5,13 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:store/core/utils/enviroments_values.dart';
 import 'package:store/domain/repositories/auth_repository.dart';
 
-enum AuthProvider { none, google, facebook }
+enum AuthProviderLocal { none, google, facebook }
 
 class AuthRepositoryImpl implements AuthRepository {
   final GoogleSignIn _google = GoogleSignIn.instance;
   GoogleSignInAccount? _currentUser;
   bool _isAuthorized = false;
-  AuthProvider _provider = AuthProvider.none;
+  AuthProviderLocal _provider = AuthProviderLocal.none;
 
   final List<String> requiredScopes = [
     'email',
@@ -66,7 +66,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       if (_google.supportsAuthenticate()) {
         await _google.authenticate();
-        _provider = AuthProvider.google;
+        _provider = AuthProviderLocal.google;
         return true;
       }
       return false;
@@ -84,10 +84,10 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> signOut() async {
     switch (_provider) {
-      case AuthProvider.google:
+      case AuthProviderLocal.google:
         await _google.disconnect();
         break;
-      case AuthProvider.facebook:
+      case AuthProviderLocal.facebook:
         await FacebookAuth.instance.logOut();
         break;
       default:
@@ -95,7 +95,7 @@ class AuthRepositoryImpl implements AuthRepository {
     }
     _currentUser = null;
     _isAuthorized = false;
-    _provider = AuthProvider.none;
+    _provider = AuthProviderLocal.none;
     _controller.add(AuthRepositoryStatus.signedOut);
   }
 
@@ -122,13 +122,20 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final result = await FacebookAuth.instance.login();
       if (result.status == LoginStatus.success) {
-        _provider = AuthProvider.facebook;
+        _provider = AuthProviderLocal.facebook;
         return true;
       }
       return false;
     } catch (e) {
       return false;
     }
+  }
+
+  String? get currentUserEmail {
+    if (_provider == AuthProviderLocal.google && _currentUser != null) {
+      return _currentUser!.email;
+    }
+    return null;
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import 'package:store/config/app_router.dart';
 import 'package:store/core/di/injection_container.dart' as di;
 
@@ -8,6 +9,7 @@ import 'presentation/cubit/auth/auth_cubit.dart';
 import 'presentation/cubit/login_form/login_form_cubit.dart';
 import 'presentation/cubit/product/product_cubit.dart';
 import 'presentation/cubit/product_detail/product_detail_cubit.dart';
+import 'presentation/pages/login/controller/login_controller.dart';
 
 
 Future<void> main() async {
@@ -15,6 +17,7 @@ Future<void> main() async {
 
   await di.init();
   await dotenv.load(fileName: ".env");
+  Get.put(LoginController());
   runApp(const MyApp());
 }
 

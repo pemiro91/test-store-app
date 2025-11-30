@@ -10,14 +10,38 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthCubit>().state;
+
+    String userEmail = authState.email ?? "Invitado";
+    String accessType;
+    switch (authState.provider) {
+      case AuthProvider.google:
+        accessType = "Google";
+        break;
+      case AuthProvider.facebook:
+        accessType = "Facebook";
+        break;
+      default:
+        accessType = "Básico";
+    }
     return Drawer(
       child: ListView(
         children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
-            child: Text(
-              'Menú',
-              style: TextStyle(color: Colors.white, fontSize: 24),
+          DrawerHeader(
+            decoration: const BoxDecoration(color: Colors.blue),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.store, color: Colors.white, size: 48),
+                const SizedBox(height: 16),
+                Text(userEmail,
+                    style: GoogleFonts.roboto(
+                        fontSize: 16, color: Colors.white)),
+                const SizedBox(height: 4),
+                Text("Acceso: $accessType",
+                    style: GoogleFonts.roboto(
+                        fontSize: 14, color: Colors.white70)),
+              ],
             ),
           ),
           ListTile(

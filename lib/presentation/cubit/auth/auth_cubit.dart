@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:store/core/utils/contants.dart';
 import 'package:store/data/repositories/auth_repository_impl.dart';
+import 'package:store/presentation/pages/home/widgets/logout_dialog.dart';
 
 part 'auth_state.dart';
-
-
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepositoryImpl authRepository;
@@ -31,7 +31,19 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signInWithGoogle() async {
     emit(state.copyWith(status: AuthStatus.loading));
     final ok = await authRepository.signInWithGoogle();
-    if (!ok) emit(state.copyWith(status: AuthStatus.error, error: "Google login failed"));
+    if (ok) {
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      emit(state.copyWith(
+        status: AuthStatus.success,
+        provider: AuthProvider.google,
+        email: authRepository.currentUserEmail,
+        isLoggedIn: true,
+      ));
+    } else {
+      emit(state.copyWith(status: AuthStatus.error, error: "Google login failed"));
+    }
   }
 
   Future<void> authorizeScopes() async {
@@ -41,26 +53,47 @@ class AuthCubit extends Cubit<AuthState> {
 
   }
 
-  Future<void> signInWithFacebook() async {
-    emit(state.copyWith(status: AuthStatus.loading));
-    final ok = await authRepository.signInWithFacebook();
-    if (ok) {
-      state.copyWith(
-        status: AuthStatus.success,
-        isLoggedIn: true,
-      );
-    } else {
-      emit(state.copyWith(status: AuthStatus.error, error: 'Facebook sign in failed'));
+  Future<bool> signInWithFacebook() async {
+    try {
+      final result = await FacebookAuth.instance.login();
+      if (result.status == LoginStatus.success) {
+
+
+        final userData = await FacebookAuth.instance.getUserData();
+        // _facebookUserEmail = userData['email'] as String?;
+
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 
   Future<void> signOut(BuildContext context) async {
+    emit(state.copyWith(status: AuthStatus.loading, isLoggingOut: true));
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LogoutDialog(),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 2000));
+
     await authRepository.signOut();
-    emit(state.copyWith(status: AuthStatus.idle));
-    if(!context.mounted) return;
-    if (Scaffold.maybeOf(context)?.isDrawerOpen ?? false) {
-      Navigator.of(context).pop();
-    }
-    context.goNamed(login);
+  }
+
+  void resetLogoutFlag() {
+    emit(state.copyWith(isLoggingOut: false));
+  }
+
+  void signInWithEmail(String email) {
+    emit(state.copyWith(
+      status: AuthStatus.success,
+      provider: AuthProvider.none, // Normal
+      email: email,
+      isLoggedIn: true,
+    ));
   }
 }

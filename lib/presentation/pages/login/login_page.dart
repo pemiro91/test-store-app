@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:store/core/utils/contants.dart';
 import 'package:store/presentation/cubit/auth/auth_cubit.dart';
 import 'package:store/presentation/cubit/login_form/login_form_cubit.dart';
+import 'package:store/presentation/pages/login/controller/login_controller.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -12,6 +14,8 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authCubit = context.read<AuthCubit>();
+    final inputController = Get.find<LoginController>();
+
     return BlocProvider(
       create: (_) => LoginFormCubit(),
       child: Scaffold(
@@ -44,9 +48,10 @@ class LoginPage extends StatelessWidget {
                             BlocBuilder<LoginFormCubit, LoginFormState>(
                               builder: (context, formState) {
                                 return TextField(
-                                  onChanged: context
-                                      .read<LoginFormCubit>()
-                                      .emailChanged,
+                                  controller: inputController.emailLoginController,
+                                  focusNode: inputController.emailFocus,
+                                  onChanged: (value) =>
+                                      context.read<LoginFormCubit>().emailChanged(value),
                                   keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
                                     prefixIcon: const Icon(Icons.email),
@@ -62,9 +67,10 @@ class LoginPage extends StatelessWidget {
                             BlocBuilder<LoginFormCubit, LoginFormState>(
                               builder: (context, formState) {
                                 return TextField(
-                                  onChanged: context
-                                      .read<LoginFormCubit>()
-                                      .passwordChanged,
+                                  controller: inputController.passwordLoginController,
+                                  focusNode: inputController.passwordFocus,
+                                  onChanged: (value) =>
+                                      context.read<LoginFormCubit>().passwordChanged(value),
                                   obscureText: !formState.showPassword,
                                   decoration: InputDecoration(
                                     prefixIcon: const Icon(Icons.lock),
@@ -97,9 +103,13 @@ class LoginPage extends StatelessWidget {
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  final formState =
-                                      context.read<LoginFormCubit>().state;
-                                  if (formState.isValid) {
+                                  final cubit = context.read<LoginFormCubit>();
+                                  cubit.validateAll(
+                                    inputController.emailLoginController.text.trim(),
+                                    inputController.passwordLoginController.text.trim(),
+                                  );
+                                  if (cubit.state.isValid) {
+                                    authCubit.signInWithEmail(inputController.emailLoginController.text.trim());
                                     context.goNamed(home);
                                   }
                                 },

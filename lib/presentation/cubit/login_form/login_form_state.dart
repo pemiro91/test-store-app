@@ -17,15 +17,18 @@ class LoginFormState {
   LoginFormState copyWith({
     String? email,
     String? emailError,
+    bool clearEmailError = false,
     String? password,
     String? passwordError,
+    bool clearPasswordError = false,
     bool? showPassword,
   }) {
     return LoginFormState(
       email: email ?? this.email,
-      emailError: emailError,
+      emailError: clearEmailError ? null : (emailError ?? this.emailError),
       password: password ?? this.password,
-      passwordError: passwordError,
+      passwordError:
+      clearPasswordError ? null : (passwordError ?? this.passwordError),
       showPassword: showPassword ?? this.showPassword,
     );
   }
